@@ -583,30 +583,59 @@
     top: 56px;
     z-index: 20;
     background: var(--bg);
-    padding: 8px 0;
+    padding: 6px 0;
     margin: 0 -16px 16px;
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: 10px;
+    padding-right: 10px;
     border-bottom: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .catnav-arrow-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .catnav-arrow-btn:hover {
+    background: var(--gold);
+    color: #15110c;
+    border-color: var(--gold);
+  }
+  .catnav-arrow-btn:active {
+    transform: scale(0.92);
   }
   .catnav {
     display: flex;
     gap: 8px;
     overflow-x: auto;
+    scroll-behavior: smooth;
     scrollbar-width: none;
     scroll-snap-type: x mandatory;
-    padding-bottom: 2px;
+    padding: 2px 0;
+    flex: 1;
   }
   .catnav::-webkit-scrollbar {
     display: none;
   }
   .catnav button {
     flex-shrink: 0;
-    scroll-snap-align: start;
+    scroll-snap-align: center;
     background: var(--card);
     border: 1px solid var(--card-border);
     color: var(--muted);
-    padding: 8px 14px;
+    padding: 8px 15px;
     border-radius: 999px;
     font-size: 13px;
     font-family: 'Cairo', sans-serif;
@@ -622,7 +651,8 @@
     background: linear-gradient(135deg, var(--gold2), var(--gold-deep));
     border-color: var(--gold2);
     color: #120e08;
-    box-shadow: 0 4px 14px rgba(240, 169, 62, 0.3);
+    box-shadow: 0 4px 14px rgba(240, 169, 62, 0.35);
+    transform: scale(1.02);
   }
 
   /* Category Section */
@@ -758,13 +788,25 @@
     border-top: 1px dashed var(--card-border);
   }
   .item-price {
-    font-size: 13px;
-    font-weight: 800;
+    font-size: 15px;
+    font-weight: 900;
     color: var(--gold);
+    display: inline-flex;
+    align-items: baseline;
+    gap: 3px;
+    letter-spacing: -0.01em;
   }
   .item-price .currency {
-    font-size: 10px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold2);
+    opacity: 0.9;
+  }
+  .item-price-from {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-inline-end: 2px;
   }
 
   .qty-control {
@@ -1345,9 +1387,11 @@
       <span class="search-icon">🔍</span>
     </div>
 
-    <!-- Sticky Category Nav -->
+    <!-- Sticky Category Nav with Arrows -->
     <div class="catnav-wrap" id="catnavWrap">
+      <button class="catnav-arrow-btn" onclick="scrollCatNav(-1)" title="Previous" aria-label="Previous category">‹</button>
       <div class="catnav" id="catnav"></div>
+      <button class="catnav-arrow-btn" onclick="scrollCatNav(1)" title="Next" aria-label="Next category">›</button>
     </div>
 
     <!-- Menu Items Categories List -->
@@ -1687,6 +1731,16 @@ function slugify(s) {
   return s.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
+function scrollCatNav(direction) {
+  const nav = document.getElementById('catnav');
+  if (!nav) return;
+  const isRtl = document.documentElement.getAttribute('dir') === 'rtl';
+  const scrollAmt = 160;
+  // If RTL, negative direction moves forward, so invert for natural feel
+  const finalDir = isRtl ? -direction : direction;
+  nav.scrollBy({ left: finalDir * scrollAmt, behavior: 'smooth' });
+}
+
 function renderMenu(filterKeyword = '') {
   const menuContainer = document.getElementById('menuContainer');
   const navContainer = document.getElementById('catnav');
@@ -1755,9 +1809,9 @@ function renderMenu(filterKeyword = '') {
 
       let priceDisplay = '';
       if (hasVariants) {
-        priceDisplay = (currentLang === 'ar' ? 'من ' : 'From ') + it.price + ` <span class="currency">${CURRENCY[currentLang]}</span>`;
+        priceDisplay = `<span class="item-price-from">${currentLang === 'ar' ? 'من' : 'From'}</span>${it.price} <span class="currency">${CURRENCY[currentLang]}</span>`;
       } else {
-        priceDisplay = it.price + ` <span class="currency">${CURRENCY[currentLang]}</span>`;
+        priceDisplay = `${it.price} <span class="currency">${CURRENCY[currentLang]}</span>`;
       }
 
       itemCard.innerHTML = `
